@@ -13,12 +13,12 @@ type ResponseWriter struct {
 	// Extend http ResponseWriter
 	http.ResponseWriter
 
-	// Publi exposed data
-	Code    int
-	Body    *bytes.Buffer
+	// Public
 	Flushed bool
 
-	// Have a flag to check if the response is writtern
+	// Private data, it is exposed throught functions
+	code        int
+	bodyBuffer  *bytes.Buffer
 	wroteHeader bool
 }
 
@@ -30,11 +30,11 @@ func NewResponseWriter(w http.ResponseWriter) *ResponseWriter {
 		ResponseWriter: w,
 
 		// Public
-		Code:    http.StatusInternalServerError,
-		Body:    new(bytes.Buffer),
 		Flushed: false,
 
 		// Private
+		code:        http.StatusInternalServerError,
+		bodyBuffer:  new(bytes.Buffer),
 		wroteHeader: false,
 	}
 }
@@ -44,7 +44,7 @@ func (w *ResponseWriter) WriteHeader(code int) {
 
 	// Save the status code when it is writtern
 	if !w.wroteHeader {
-		w.Code = code
+		w.code = code
 	}
 
 	// Write the header
@@ -63,7 +63,7 @@ func (w *ResponseWriter) Write(b []byte) (int, error) {
 	}
 
 	// Append data to the body and set the wrote flag
-	w.Body.Write(b)
+	w.bodyBuffer.Write(b)
 
 	// Done, return the response write function
 	return w.ResponseWriter.Write(b)
@@ -92,4 +92,26 @@ func (w *ResponseWriter) CloseNotify() <-chan bool {
 // Provide the hijacker interface
 func (w *ResponseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	return w.ResponseWriter.(http.Hijacker).Hijack()
+}
+
+// Return the status code of the response
+func (w *ResponseWriter) StatusCode() int {
+	return w.code
+}
+
+// Return the wrote body length
+func (w *ResponseWriter) Body() string {
+
+	// Return an empty string if no content length
+	if w.ContentLength() == 0 {
+		return ""
+	}
+
+	// Return a string containing the body
+	return w.bodyBuffer.String()
+}
+
+// Return the wrote body length
+func (w *ResponseWriter) ContentLength() int {
+	return w.bodyBuffer.Len()
 }
