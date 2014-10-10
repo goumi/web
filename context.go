@@ -1,38 +1,63 @@
-package ape
+package goumi
 
 import "net/http"
 
-// Context is a wrapper f
-type Context struct {
-	Res *ResponseWriter
-	Req *http.Request
+// Context interface
+type Context interface {
 
-	// Next
+	// Readers for request and response
+	Request() *http.Request
+	Response() ResponseWriter
+
+	// Iterator
+	Next()
+
+	// Add data to the chain
+	Push(chain []Handler)
+}
+
+// Context is a wrapper f
+type context struct {
+	res ResponseWriter
+	req *http.Request
+
+	// Chain
 	chain []Handler
 	index int
 }
 
-// Setup a new context
-func NewContext(w http.ResponseWriter, r *http.Request) *Context {
+// NewContext - Setup a new context
+func newContext(w http.ResponseWriter, r *http.Request) Context {
 
-	return &Context{
-		Res: NewResponseWriter(w),
-		Req: r,
+	return &context{
+		res: newResponse(w),
+		req: r,
 
+		// Chain index
 		index: -1,
 	}
 }
 
-// Append middleware to the context
-func (ctx *Context) Push(chain []Handler) {
+// Getter fir Response
+func (ctx *context) Response() ResponseWriter {
+	return ctx.res
+}
+
+// Getter for Request
+func (ctx *context) Request() *http.Request {
+	return ctx.req
+}
+
+// Push - Append middleware to the context
+func (ctx *context) Push(chain []Handler) {
 	ctx.chain = append(ctx.chain, chain[0:]...)
 }
 
-// Next function
-func (ctx *Context) Next() {
+// Next - Next function
+func (ctx *context) Next() {
 
 	// Advance the index
-	ctx.index += 1
+	ctx.index++
 
 	// Load the element from the chain
 	if ctx.index >= len(ctx.chain) {
