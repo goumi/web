@@ -20,12 +20,7 @@ func main() {
   // Setup the app
   g := goumi.New()
 
-  // Setup a middleware
-  g.Use(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-    w.Header().Add("X-Powered-By", "Gibbon")
-  }))
-
-  // Load the server
+  // Use middleware
   g.Use(goumi.HandlerFunc(func(ctx goumi.Context) {
     ctx.Response().Header().Add("X-Powered-By", "Goumi")
 
