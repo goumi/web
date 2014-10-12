@@ -23,7 +23,6 @@ type context struct {
 
 	// Chain
 	chain []Handler
-	index int
 }
 
 // NewContext - Setup a new context
@@ -32,9 +31,6 @@ func newContext(w http.ResponseWriter, r *http.Request) Context {
 	return &context{
 		res: newResponse(w),
 		req: r,
-
-		// Chain index
-		index: -1,
 	}
 }
 
@@ -50,20 +46,23 @@ func (ctx *context) Request() *http.Request {
 
 // Push - Append middleware to the context
 func (ctx *context) Push(chain []Handler) {
-	ctx.chain = append(ctx.chain, chain[0:]...)
+	ctx.chain = append(chain, ctx.chain[0:]...)
 }
 
 // Next - Next function
 func (ctx *context) Next() {
 
-	// Advance the index
-	ctx.index++
-
-	// Load the element from the chain
-	if ctx.index >= len(ctx.chain) {
+	// Check if we have middleware in the chain
+	if len(ctx.chain) < 1 {
 		return
 	}
 
-	// Run the Handler
-	ctx.chain[ctx.index].Serve(ctx)
+	// Grab the next middleware
+	mw := ctx.chain[0]
+
+	// Remove it from the chain
+	ctx.chain = ctx.chain[1:]
+
+	// Serve the middleware
+	mw.Serve(ctx)
 }
