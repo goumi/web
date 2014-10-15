@@ -1,6 +1,6 @@
 # Goumi
 
-Goumi is a very simple way to sandboxed modular applications. It improves on the `net/http` and tries to be as minimal as possible. It is inspired by [KoaJS](http://koajs.com/).
+Goumi is a very simple way to build modular applications. It improves on the `net/http` and tries to be as minimal as possible. It is inspired by [KoaJS](http://koajs.com/).
 
 ## Getting Started
 
