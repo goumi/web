@@ -10,10 +10,6 @@ A usage example:
 
 	m := web.New()
 
-Use your favorite HTTP Handlers:
-
-	var legacyFooHttpHandler http.Handler // From elsewhere
-
 	// Loaded from elsewhere
 	var handler web.Handler
 	var httphandler http.Handler
@@ -101,16 +97,16 @@ func (ctx *appContext) Next() {
 	// Increment
 	ctx.index++
 
-	// Check if we have middleware in the chain
-	if ctx.index >= len(ctx.chain) {
+	// Check if we have middleware in the current chain
+	if ctx.index < len(ctx.chain) {
 
-		// Advance the previous chain
-		ctx.Context.Next()
+		// Serve the current handler
+		ctx.chain[ctx.index].Serve(ctx)
 
 		// Done
 		return
 	}
 
-	// Serve the current handler
-	ctx.chain[ctx.index].Serve(ctx)
+	// Exit current chain, advance to the next one
+	ctx.Context.Next()
 }
