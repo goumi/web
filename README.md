@@ -1,6 +1,6 @@
 # Goumi
 
-Goumi is a very simple way to setup middleware, that improves on the `net/http` Handler interface.
+Goumi is a very simple way to sandboxed modular applications. It improves on the `net/http` and tries to be as minimal as possible. It is inspired by [KoaJS](http://koajs.com/).
 
 ## Getting Started
 
@@ -11,34 +11,48 @@ package main
 
 import (
   "fmt"
-  "github.com/claudiuandrei/goumi"
+  "github.com/goumi/web"
+  "github.com/goumi/logger"
+  "github.com/goumi/mount"
   "net/http"
 )
 
 func main() {
 
   // Setup the app
-  g := goumi.New()
+  m := web.New()
 
-  // Use middleware
-  g.Use(goumi.HandlerFunc(func(ctx goumi.Context) {
-    ctx.Response().Header().Add("X-Powered-By", "Goumi")
+  // Logger
+  m.Use(logger.New())
 
-    // Call next middleware
-    ctx.Next()
-
-    // Do stuff after the chain ends
-  }))
-
-  // Setup the router
+  // Router
   mux := http.NewServeMux()
   mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
     fmt.Fprintf(w, "Welcome to Goumi!")
   })
-  g.Use(goumi.HTTPHandler(mux));
+  m.Use(web.HTTPHandler(mux))
+
+  // Mount another application
+  mw := web.New()
+
+  // Run another middleware
+  mw.Use(web.HandlerFunc(func(ctx Context) {
+
+    // Do your stuff
+    ctx.Response().Header().Add("X-Powered-By", "Goumi")
+
+    // Call next middlware
+    ctx.Next()
+
+    // You can do something else after the stack has run
+    ctx.Response().Write([]byte("Hello!"))
+  }))
+
+  // Mount it on hello
+  m.Use(mount.New("/hello", mw))
 
   // Run the server
-  http.ListenAndServe(":3000", g)
+  http.ListenAndServe(":3000", m)
 }
 ~~~
 
@@ -66,14 +80,16 @@ Goumi is BYOR (Bring your own Router). Goumi is fully supporting `net/http`.
 
 ## TODO
 
-- Router
-- Logger
-- Server (with logging)
-- Static file serving
-- Environment
 - Docs
 - Tests
-- View Layer
-- Template / Pongo2 (React)
 - Errors
+- Recovery
+
+## Midleware
+
+- Logger
+- Server
+- Static
+- Router
 - Session
+- Templates (Pongo2)

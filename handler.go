@@ -1,33 +1,39 @@
-package goumi
+package web
 
 import "net/http"
 
-// Handler - Serve a context
+// Handler is a addapter of net/http's http.Handler to use a single extensible
+// context, instead of response writer and request.
 type Handler interface {
 	Serve(ctx Context)
 }
 
-// HandlerFunc - Just build a handler
+// HandlerFunc converts a function into a Handler
 type HandlerFunc func(ctx Context)
 
-// Serve calls f(ctx)
+// Serve calls the parent function
 func (fn HandlerFunc) Serve(ctx Context) {
 	fn(ctx)
 }
 
-// HTTP Handler Adapter
+// HTTPHandler extends http.Handler to act as a Handler
+type httpHandler struct {
+	http.Handler
+}
+
+// HTTPHandler creates a new Handler from a http.Handler
 func HTTPHandler(h http.Handler) Handler {
-
-	// Convert the HTTP Handler to a Goumi Hanler
-	fn := func(ctx Context) {
-
-		// Serve the handler
-		h.ServeHTTP(ctx.Response(), ctx.Request())
-
-		// Load the next context
-		ctx.Next()
+	return &httpHandler{
+		Handler: h,
 	}
+}
 
-	// Return the handler interface
-	return HandlerFunc(fn)
+// Serve runs the http.Handler ServeHTTP then goes to the next middleware.
+func (h *httpHandler) Serve(ctx Context) {
+
+	// Serve the handler
+	h.ServeHTTP(ctx.Response(), ctx.Request())
+
+	// Load the next context
+	ctx.Next()
 }

@@ -1,68 +1,42 @@
-package goumi
+package web
 
 import "net/http"
 
-// Context interface
+// Context is a per request object which will be passed arround to all middleware.
+// It is meant to be extended in order to provide more functionality.
 type Context interface {
 
-	// Readers for request and response
+	// Readers for request and response writer
 	Request() *http.Request
 	Response() ResponseWriter
 
 	// Iterator
 	Next()
-
-	// Add data to the chain
-	Push(chain []Handler)
 }
 
-// Context is a wrapper f
+// context is the most simple implementation of the Context interface
 type context struct {
 	res ResponseWriter
 	req *http.Request
-
-	// Chain
-	chain []Handler
 }
 
-// NewContext - Setup a new context
+// newContext() sets up new context from the response writer and request
 func newContext(w http.ResponseWriter, r *http.Request) Context {
-
 	return &context{
 		res: newResponse(w),
 		req: r,
 	}
 }
 
-// Getter fir Response
+// Response() gets the response from the context
 func (ctx *context) Response() ResponseWriter {
 	return ctx.res
 }
 
-// Getter for Request
+// Request() gets the request from the context
 func (ctx *context) Request() *http.Request {
 	return ctx.req
 }
 
-// Push - Append middleware to the context
-func (ctx *context) Push(chain []Handler) {
-	ctx.chain = append(chain, ctx.chain[0:]...)
-}
-
-// Next - Next function
-func (ctx *context) Next() {
-
-	// Check if we have middleware in the chain
-	if len(ctx.chain) < 1 {
-		return
-	}
-
-	// Grab the next middleware
-	mw := ctx.chain[0]
-
-	// Remove it from the chain
-	ctx.chain = ctx.chain[1:]
-
-	// Serve the middleware
-	mw.Serve(ctx)
-}
+// Next() is not implemented by default
+func (ctx *context) Next() {}
