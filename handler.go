@@ -5,7 +5,7 @@ import "net/http"
 // Handler is a addapter of net/http's http.Handler to use a single extensible
 // context, instead of response writer and request.
 type Handler interface {
-	Serve(ctx Context)
+	Serve(Context)
 }
 
 // HandlerFunc converts a function into a Handler

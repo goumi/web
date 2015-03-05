@@ -12,6 +12,7 @@ package main
 import (
   "fmt"
   "github.com/goumi/web"
+  "github.com/goumi/app"
   "github.com/goumi/logger"
   "github.com/goumi/mount"
   "net/http"
@@ -20,7 +21,7 @@ import (
 func main() {
 
   // Setup the app
-  m := web.New()
+  m := app.New()
 
   // Logger
   m.Use(logger.New())
@@ -33,10 +34,10 @@ func main() {
   m.Use(web.HTTPHandler(mux))
 
   // Mount another application
-  mw := web.New()
+  mw := app.New()
 
   // Run another middleware
-  mw.Use(web.HandlerFunc(func(ctx Context) {
+  mw.Use(web.HandlerFunc(func(ctx web.Context) {
 
     // Do your stuff
     ctx.Response().Header().Add("X-Powered-By", "Goumi")

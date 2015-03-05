@@ -20,23 +20,23 @@ type context struct {
 	req *http.Request
 }
 
-// newContext() sets up new context from the response writer and request
-func newContext(w http.ResponseWriter, r *http.Request) Context {
+// newContext sets up new context from the response writer and request
+func NewContext(w http.ResponseWriter, r *http.Request) Context {
 	return &context{
-		res: newResponse(w),
+		res: NewResponse(w),
 		req: r,
 	}
 }
 
-// Response() gets the response from the context
+// Response gets the response from the context
 func (ctx *context) Response() ResponseWriter {
 	return ctx.res
 }
 
-// Request() gets the request from the context
+// Request gets the request from the context
 func (ctx *context) Request() *http.Request {
 	return ctx.req
 }
 
-// Next() is not implemented by default
+// Next is not implemented by default
 func (ctx *context) Next() {}

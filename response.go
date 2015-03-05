@@ -29,7 +29,7 @@ type response struct {
 }
 
 // newResponse creates a new ResponseWriter interface
-func newResponse(w http.ResponseWriter) ResponseWriter {
+func NewResponse(w http.ResponseWriter) ResponseWriter {
 
 	return &response{
 		ResponseWriter: w,
