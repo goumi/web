@@ -28,7 +28,7 @@ type response struct {
 	wroteHeader bool
 }
 
-// newResponse creates a new ResponseWriter interface
+// NewResponse creates a new ResponseWriter interface
 func NewResponse(w http.ResponseWriter) ResponseWriter {
 
 	return &response{

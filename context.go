@@ -20,7 +20,7 @@ type context struct {
 	req *http.Request
 }
 
-// newContext sets up new context from the response writer and request
+// NewContext sets up new context from the response writer and request
 func NewContext(w http.ResponseWriter, r *http.Request) Context {
 	return &context{
 		res: NewResponse(w),
